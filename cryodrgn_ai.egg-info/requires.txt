@@ -1,0 +1,4 @@
+cryodrgn
+pillow<10
+tensorboard
+pytest
