@@ -1,34 +1,23 @@
-# :dragon::robot: DRGN-AI: _Ab initio_ cryo-EM and cryo-ET heterogeneous reconstruction #
+# Hydra: Mixture of Neural Fields for Heterogeneous Reconstruction in Cryo-EM #
 
-DRGN-AI is a neural network-based algorithm for _ab initio_ heterogeneous single-particle cryo-EM and cryo-ET subtomogram reconstruction. The
-method leverages the expressive representation capacity of neural models with a novel joint inference procedure of poses and heterogeneous conformational states to enable single-shot reconstruction of noisy, large cryo-EM datasets. 
+Hydra is a neural network-based algorithm for _ab initio_ heterogeneous single-particle cryo-EM reconstruction. Building on top of [DRGN-AI](https://github.com/ml-struct-bio/drgnai), the
+method parameterizes structures as arising from one of _K_ neural fields, thus jointly modeling both compositional and conformational heterogeneity and enabling the reconstruction of mixtures of flexible biomolecules.
 
 ## Documentation ##
 
-The latest detailed documentation for DRGN-AI is available [on gitbook](https://ez-lab.gitbook.io/drgn-ai/), 
-including an overview and walkthrough of DRGN-AI installation, training and analysis. A brief quick start is
+Hydra borrows its user interface and workflow from DRGN-AI. The latest detailed documentation for DRGN-AI is available [on gitbook](https://ez-lab.gitbook.io/drgn-ai/), 
+including an overview and walkthrough of installation, training and analysis. A brief quick start is
 provided below.
-
-## New in Version 0.2.2-beta ##
-
- - `drgnai filter` interface for interactive filtering of particles
- - support for `$DRGNAI_DATASETS` dataset catalogue
- - cleaner tracking of configuration specifications
-
 
 ## Installation ##
 
-We recommend installing DRGN-AI in a clean conda environment — first clone the latest stable version available in 
-the git repository, and then use `pip` to install the package from the source code:
+We recommend installing Hydra in a clean conda environment — first clone the git repository, and then use `pip` to install the package from the source code:
 
-    (base) $ conda create --name drgnai python=3.9
-    (base) $ conda activate drgnai
-    (drgnai) $ git clone git@github.com:ml-struct-bio/cryodrgnai.git --branch v0.2.2-beta --single-branch
-    (drgnai) $ cd cryodrgnai/
-    (drgnai) $ pip install . 
-
-You can also install the latest development version of DRGN-AI using
-`git clone git@github.com:ml-struct-bio/cryodrgnai.git` instead of the above `git clone` command.
+    (base) $ conda create --name hydra python=3.9
+    (base) $ conda activate hydra
+    (hydra) $ git clone git@github.com:ml-struct-bio/hydra.git --branch main --single-branch
+    (hydra) $ cd hydra
+    (hydra) $ pip install . 
 
 To confirm that the package was installed successfully, use `drgnai test`:
 
@@ -63,8 +52,8 @@ instead. For example,
 
 ```
 drgnai setup out-dir --particles /my_data/particles.mrcs --ctf /my_data/ctf.pkl \
-                     --capture-setup spa --conf-estimation autodecoder \
-                     --pose-estimation abinit --reconstruction-type het                               
+                     --conf-estimation autodecoder --pose-estimation abinit \
+                     --reconstruction-type het                               
 ```
 
 This command will create an output directory called `out-dir` and a configuration file `out-dir/configs.yaml`:
@@ -82,12 +71,11 @@ quick_config:
 
 ### Reconstruction and analysis ###
 
-After setup is complete, run the experiment using `drgnai train out-dir`. You can also perform further
-analyses on a particular training epoch instead of the last epoch, which is analyzed by default at the end of `train`:
+After setup is complete, run the experiment using `drgnai train out-dir`. You can perform analysis on a particular training epoch and class using the `analyze` command:
 
 ```
 drgnai train out-dir
-drgnai analyze out-dir --epoch 25
+drgnai analyze out-dir --epoch 25 --class-idx 3
 ```
 
 `drgnai` will save the outputs of training under `out-dir/out`; outputs of each analysis will be stored under 
@@ -113,7 +101,6 @@ output directory and 6565 is an arbitrary port number.
 The behaviour of the algorithm can be modified by passing different values to `drgnai setup` at the beginning of the
 experiment. However, only the most important parameters are available through this interface:
 
- - `--capture-setup` “spa” for single-particle analysis (default) or “et” for electron tomography
  - `--reconstruction-type` “het” for heterogeneous or “homo” for homogeneous (default)
  - `--pose-estimation` “abinit” for no initialization (default), “refine” to refine provided poses by gradient
                        descent or “fixed” to use provided poses without refinement
@@ -122,30 +109,23 @@ experiment. However, only the most important parameters are available through th
 
 Note that each argument can be specified using a non-ambiguous prefix, e.g.
 ```
-drgnai setup out-dir --dataset 50S_128 --cap spi --conf autodecoder \
+drgnai setup out-dir --dataset 50S_128 --conf autodecoder \
                      --pose-estim abinit --reconstr het
 ```
 
 To change the other configuration parameters, the `configs.yaml` file must be edited directly before the experiment
-is run. For a full overview of how to configure the parameters used in the DRGN-AI model, see the
-[docs](https://ez-lab.gitbook.io/drgn-ai/configuration).
+is run. The base parameters of DRGN-AI are described in the [docs](https://ez-lab.gitbook.io/drgn-ai/configuration).
+Additional parameters used in Hydra are described below:
+
+ - `n_classes`: [int, default = 1] Number of classes. Should be at least as many distinct particle types you expect in the data.
+ - `lr_score_table`: [float, default = 1.0e-2] Learning rate of the class score table.
+ - `std_noise`: [float, default = 1.0] Higher values encourage more uniform class posteriors, and vice versa.
 
 
 ## Reference ##
 
-Coming soon...
-
-## Previous versions ##
-
-Below are major past releases of cryoDRGN with the features introduced in each:
-
-### Version 0.2.0-beta ###
-
- - creating a new `drgnai` command line interface for easier use of the package
- - simplifying how configuration files are used
- - new version of the README, creating gitbook documentation
-
+Mixture of Neural Fields for Heterogeneous Reconstruction in Cryo-EM. Axel Levy*, Rishwanth Raghu*, David Shustin*, Adele Rui-Yang Peng, Huan Li, Oliver Clarke, Gordon Wetzstein, Ellen D. Zhong. NeurIPS, 2024.
 
 ## Contact ##
 
-For any feedback, questions, or bugs, please file a Github issue or contact Ellen Zhong (zhonge [at] princeton.edu).
+For any feedback, questions, or bugs, please file a Github issue.
